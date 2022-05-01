@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -37,7 +37,13 @@ export class UsersService {
     }
 
     if (bcrypt.compareSync(password, user.password)) {
-      return user;
+      if (user.isActive) {
+        throw new NotFoundException(
+          'There is already an active session using your account.',
+        );
+      }
+      user.isActive = true;
+      return user.save();
     }
 
     throw new NotFoundException(
@@ -93,36 +99,6 @@ export class UsersService {
   }
 
   /**
-   * Refresh an access token.
-   *
-   * For refresh tokens that have less than ten minutes before expiry a new refresh token is also
-   * added to the payload.
-   *
-   * @param request
-   */
-  async refreshAccessToken(request: any): Promise<any> {
-    const payload = {
-      id: request.user.id,
-    };
-
-    // Get expiring time
-    const exp = request.user.exp * 1000;
-    const timeLeft = Math.floor((exp - Date.now()) / 1000 / 60);
-
-    // Return if less than or equal 10 minutes;
-    if (timeLeft <= 10) {
-      return {
-        accessToken: this.jwtService.sign(payload, { expiresIn: 3000 }),
-        refreshToken: this.jwtService.sign(payload, { expiresIn: '1h' }),
-      };
-    }
-
-    return {
-      accessToken: this.jwtService.sign(payload, { expiresIn: 3000 }),
-    };
-  }
-
-  /**
    * Get application roles.
    *
    * @todo Integrate with the roles guard.
@@ -137,7 +113,7 @@ export class UsersService {
    * Get user
    * @param user
    */
-  async getUser(user: any): Promise<User> {
+  async getUser(user: User): Promise<User> {
     return await this.UserModel.findById(user.id).select('+password');
   }
 
@@ -147,5 +123,15 @@ export class UsersService {
    */
   async updateUser(id: string, data: UpdateUserInput): Promise<User> {
     return this.UserModel.findByIdAndUpdate(id, data, { new: true }).exec();
+  }
+
+  async logoutAll(id: string): Promise<number> {
+    await this.UserModel.findByIdAndUpdate(
+      id,
+      { isActive: false },
+      { new: true },
+    ).exec();
+
+    return HttpStatus.OK;
   }
 }

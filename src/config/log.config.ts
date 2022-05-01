@@ -4,7 +4,7 @@ import config, { LogTransport } from '.';
 import { LogstashTransport } from 'winston-logstash-ts-fix';
 import Transport from 'winston-transport';
 
-const APP_NAME = 'AccountService';
+const APP_NAME = 'VendorAppAPiService';
 
 const resolveLogTransport = (): Transport => {
   const configTransport = config().log.logTransport;

@@ -45,8 +45,7 @@
     },
     "types": [
       "@types/node",
-      "@types/jest",
-      "@types/dotenv"
+      "@types/jest"
     ]
   }
 }

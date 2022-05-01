@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  app:
+    container_name: vendor_app_api
+    image: vendor-app-api-service:1.0.0
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
+      args:
+        NODE_ENV: development
+    command: npm run start:dev
+    ports:
+      - 3000:3000
+      - 50051:50051
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+    networks:
+      - nestjs-network
+    volumes:
+      - .:/usr/src/app
+  
+  mongodb: 
+    image : davybello/mongo-replica-set:4.4.8
+    container_name: vendor-app-api-service-mongodb
+    volumes:
+      - "./docker/.data/mongo1:/var/lib/mongo1"
+      - "./docker/.data/mongo2:/var/lib/mongo2"
+      - "./docker/.data/mongo3:/var/lib/mongo3"
+    ports:
+      - 27017:27017
+      - 27018:27018
+      - 27019:27019
+    networks:
+      - nestjs-network
+
+networks:
+  nestjs-network:

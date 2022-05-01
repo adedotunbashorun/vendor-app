@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsString, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export default class CreateUserInput {
@@ -19,11 +19,11 @@ export default class CreateUserInput {
 
   @ApiProperty()
   @IsEmail()
-  @IsOptional()
   email: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
+  @IsEnum(['buyer', 'seller'])
   role: string;
 }

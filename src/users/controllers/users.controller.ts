@@ -9,7 +9,6 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Request } from 'express';
 
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from '../services/users.service';
@@ -18,7 +17,7 @@ import { User } from '../schema/users/user.schema';
 import { CurrentUser } from '../users.decorators';
 
 @ApiTags('users')
-@Controller('api/users')
+@Controller('api')
 export class UsersController {
   constructor(private readonly auth: UsersService) {}
 
@@ -29,7 +28,7 @@ export class UsersController {
   @Post('login')
   @ApiResponse({ status: 201, description: 'user logged in.' })
   @ApiResponse({ status: 401, description: 'unauthorized.' })
-  async login(@Req() request: Request): Promise<any> {
+  async login(@Req() request): Promise<any> {
     return this.auth.login(request.user);
   }
 
@@ -42,18 +41,6 @@ export class UsersController {
   @ApiResponse({ status: 401, description: 'unauthorized.' })
   async register(@Body() input: CreateUserInput): Promise<User> {
     return this.auth.registerUser(input);
-  }
-
-  /**
-   * Generate a refresh token
-   * @param request
-   */
-  @UseGuards(AuthGuard('jwt'))
-  @Post('token')
-  @ApiResponse({ status: 201, description: 'refresh token.' })
-  @ApiResponse({ status: 401, description: 'unauthorized.' })
-  async refreshAccessToken(@Req() request: Request): Promise<any> {
-    return this.auth.refreshAccessToken(request);
   }
 
   /**
@@ -70,5 +57,18 @@ export class UsersController {
     return {
       user: currentUser,
     };
+  }
+
+  /**
+   * logout currently authenticated user
+   * @param resp
+   * @param user
+   */
+  @UseGuards(AuthGuard('jwt'))
+  @Get('logout/all')
+  @ApiResponse({ status: 201, description: 'logout currently loggedIn user.' })
+  @ApiResponse({ status: 401, description: 'unauthorized.' })
+  async logoutAll(@CurrentUser() user: User): Promise<number> {
+    return this.auth.logoutAll(user.id);
   }
 }
