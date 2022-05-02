@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -14,8 +17,10 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from '../services/users.service';
 import CreateUserInput from '../input/createUser.input';
 import { User } from '../schema/users/user.schema';
-import { CurrentUser } from '../users.decorators';
+import { CurrentUser, Roles } from '../users.decorators';
 import LoginInput from '../input/login.input';
+import UpdateUserInput from '../input/updateUser.input';
+import RolesGuard from '@vendor-app/core/guards/roles.guard';
 
 @ApiTags('users')
 @Controller('api')
@@ -45,6 +50,22 @@ export class UsersController {
   }
 
   /**
+   * update current user.
+   */
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('seller')
+  @Patch('users')
+  @ApiResponse({ status: 201, description: 'user updated.' })
+  @ApiResponse({ status: 401, description: 'unauthorized.' })
+  async update(
+    @Param('id') id: string,
+    @Body() input: UpdateUserInput,
+  ): Promise<User> {
+    return this.auth.updateUser(id, input);
+  }
+
+  /**
    * Get currently authenticated user
    * @param resp
    * @param user
@@ -71,5 +92,15 @@ export class UsersController {
   @ApiResponse({ status: 401, description: 'unauthorized.' })
   async logoutAll(@CurrentUser() user: User): Promise<number> {
     return this.auth.logoutAll(user.id);
+  }
+
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('seller')
+  @Delete('users')
+  @ApiResponse({ status: 201, description: 'user deleted' })
+  @ApiResponse({ status: 401, description: 'unauthorized.' })
+  async delete(@Param('id') id: string): Promise<User> {
+    return this.auth.delete(id);
   }
 }

@@ -134,4 +134,8 @@ export class UsersService {
 
     return HttpStatus.OK;
   }
+
+  async delete(_id: string): Promise<any> {
+    return this.UserModel.deleteOne({ _id });
+  }
 }
