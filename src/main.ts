@@ -14,7 +14,7 @@ async function bootstrap() {
   const app = await NestFactory.create(CoreModule);
 
   Sentry.init({
-    dsn: 'https://fa284e6f6c6b44b9835f43328df2c127@o275135.ingest.sentry.io/5453091',
+    dsn: process.env.SENTRY_URL,
   });
 
   app.useGlobalPipes(new ValidationPipe());
