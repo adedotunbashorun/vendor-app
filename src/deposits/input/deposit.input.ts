@@ -1,6 +1,6 @@
 import { IsInt, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import config from '@vendor-app/config';
+import config from '@vendor-app/config/index';
 
 export default class DepositInput {
   @ApiProperty()

@@ -13,9 +13,7 @@ export const rootMongooseTestModule = (options?: MongooseModuleOptions) =>
     useFactory: async () => {
       const defaultOptions: MongooseModuleOptions = {
         useNewUrlParser: true,
-        useCreateIndex: true,
         useUnifiedTopology: true,
-        useFindAndModify: false,
       };
       mongod = await MongoMemoryServer.create();
       const mongoUri = mongod.getUri();

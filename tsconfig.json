@@ -27,7 +27,7 @@
       "@vendor-app/*": [
         "src/*"
       ],
-      "@vendor-app/config/*": [
+      "@vendor-app/config/index/*": [
         "src/config/*"
       ],
       "@vendor-app/core/*": [

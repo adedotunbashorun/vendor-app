@@ -48,7 +48,7 @@ export class ProductsController {
     @CurrentUser() user: User,
     @Body() data: CreateProductInput,
   ): Promise<Product> {
-    return this.product.store(user, data);
+    return this.product.create(user, data);
   }
 
   @UsePipes(new ValidationPipe({ whitelist: true }))

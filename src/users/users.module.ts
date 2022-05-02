@@ -4,7 +4,7 @@ import { UsersController } from '@vendor-app/users/controllers/users.controller'
 import { MongooseModelModule } from '@vendor-app/core/mongooseModels.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import configuration from '@vendor-app/config';
+import configuration from '@vendor-app/config/index';
 import { JwtStrategy } from './strategies/jwt/jwt.strategy';
 import LocalStrategy from './strategies/local/local.strategy';
 

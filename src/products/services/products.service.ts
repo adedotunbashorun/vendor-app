@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import _ from 'lodash';
 import { Document, Model, PaginateModel, Connection } from 'mongoose';
 
 import { SCHEMAS } from '@vendor-app/core/constants';
@@ -9,8 +8,7 @@ import { Product } from '@vendor-app/products/schema/products/product.schema';
 import { User } from '@vendor-app/users/schema/users/user.schema';
 import BuyProductInput, { CartItem } from '../input/buyProduct.input';
 import CreateProductInput from '../input/createProduct.input';
-import config from '@vendor-app/config';
-import { response } from 'express';
+import config from '@vendor-app/config/index';
 
 type ProductModel<T extends Document> = PaginateModel<T>;
 @Injectable()
@@ -45,7 +43,7 @@ export class ProductsService {
     });
   }
 
-  async store(user: User, input: CreateProductInput): Promise<Product> {
+  async create(user: User, input: CreateProductInput): Promise<Product> {
     return this.productModel.create({
       ...input,
       sellerId: user.id,
@@ -68,8 +66,7 @@ export class ProductsService {
     const items = input.products;
     let totalAmount = 0;
     const productsArray = [];
-
-    if (_.isEmpty(user.deposit)) {
+    if (user.deposit === null) {
       throw new BadRequestException(
         'Whoops! You dont have any coins deposited to make purchases, deposit coins now',
       );
@@ -92,7 +89,7 @@ export class ProductsService {
               })
               .exec();
             productsArray.push({
-              id: product.id,
+              id: product._id,
               name: product.name,
               cost: product.cost,
               quantity: item.quantity,
@@ -101,7 +98,7 @@ export class ProductsService {
         }),
       );
 
-      if (_.isEmpty(totalAmount)) {
+      if (totalAmount === null) {
         throw new BadRequestException(
           'Whoops! something went wrong, re-select products and try again',
         );
@@ -120,7 +117,7 @@ export class ProductsService {
       await session.commitTransaction();
 
       //Return products, total and change back to the user
-      return response.json({
+      return {
         success: true,
         data: {
           products: productsArray,
@@ -128,7 +125,7 @@ export class ProductsService {
           totalAmount,
           change: this.getCoinsChangeArray(availableBalance),
         },
-      });
+      };
     } catch (error) {
       await session.abortTransaction();
       throw error;
