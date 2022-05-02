@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from '@sentry/node';
@@ -24,7 +24,7 @@ export class DepositsController {
   @ApiResponse({ status: 401, description: 'unauthorized.' })
   async deposit(
     @CurrentUser() user: User,
-    input: DepositInput,
+    @Body() input: DepositInput,
   ): Promise<{ user: User }> {
     const response = await this.depositService.deposit(user.id, input);
     return {
@@ -39,7 +39,7 @@ export class DepositsController {
    */
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('buyer')
-  @Post('reset')
+  @Get('reset')
   @ApiResponse({ status: 201, description: 'reset user deposit.' })
   @ApiResponse({ status: 401, description: 'unauthorized.' })
   async reset(@CurrentUser() user: User): Promise<{ user: User }> {

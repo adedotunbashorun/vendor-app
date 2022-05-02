@@ -24,6 +24,10 @@ export interface Configuration {
     expireIn: string;
     secret: string;
   };
+  jwt: {
+    secret: string;
+    duration: string;
+  };
 }
 
 const { NODE_ENV, SERVER_MODE } = process.env;
@@ -40,7 +44,7 @@ export default (): Configuration => ({
   },
   port: parseInt(process.env.PORT, 10) || 8080,
   database: {
-    url: `${process.env.MONGO_URI}/${process.env.DB_NAME}`,
+    url: process.env.MONGO_URI,
   },
   log: {
     logLevel: process.env.LOG_LEVEL,
@@ -51,5 +55,9 @@ export default (): Configuration => ({
   passwordResetConfig: {
     expireIn: process.env.PASSWORD_RESET_EXPIRE_IN,
     secret: process.env.PASSWORD_RESET_JWT_SECRET,
+  },
+  jwt: {
+    secret: process.env.JWT_SECRET,
+    duration: process.env.TOKEN_LIFETIME as string,
   },
 });
