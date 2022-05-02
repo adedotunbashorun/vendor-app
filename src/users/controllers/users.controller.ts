@@ -15,6 +15,7 @@ import { UsersService } from '../services/users.service';
 import CreateUserInput from '../input/createUser.input';
 import { User } from '../schema/users/user.schema';
 import { CurrentUser } from '../users.decorators';
+import LoginInput from '../input/login.input';
 
 @ApiTags('users')
 @Controller('api')
@@ -28,7 +29,7 @@ export class UsersController {
   @Post('login')
   @ApiResponse({ status: 201, description: 'user logged in.' })
   @ApiResponse({ status: 401, description: 'unauthorized.' })
-  async login(@Req() request): Promise<any> {
+  async login(@Req() request, @Body() input: LoginInput): Promise<any> {
     return this.auth.login(request.user);
   }
 
