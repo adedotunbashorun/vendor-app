@@ -8,10 +8,12 @@ import {
 import { ProductsService } from './products.service';
 import configuration from '@vendor-app/config/index';
 import { TestDataSeeder } from '../../../test/testDataSeeder';
+import { DepositsService } from '@vendor-app/deposits/services/deposits.service';
 
 describe.only('ProductsService', () => {
   let testDataSeeder: TestDataSeeder;
   let service: ProductsService;
+  let depositService: DepositsService;
   let module: TestingModule;
 
   beforeEach(async () => {
@@ -24,11 +26,12 @@ describe.only('ProductsService', () => {
           isGlobal: true,
         }),
       ],
-      providers: [ProductsService],
+      providers: [ProductsService, DepositsService],
     }).compile();
 
     service = module.get<ProductsService>(ProductsService);
     testDataSeeder = TestDataSeeder.create(module);
+    depositService = module.get<DepositsService>(DepositsService);
   });
 
   it('should be defined', () => {
@@ -114,6 +117,8 @@ describe.only('ProductsService', () => {
       let buyer = await testDataSeeder.seedUserByRole('buyer');
       buyer = await testDataSeeder.seedUserDeposit(buyer._id, 50);
       const products = await testDataSeeder.seedProduct(seller._id);
+      jest.spyOn(depositService, 'reset').mockImplementation();
+
       const result = await service.buy(buyer, {
         products: [
           {

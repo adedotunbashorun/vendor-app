@@ -9,6 +9,7 @@ import { User } from '@vendor-app/users/schema/users/user.schema';
 import BuyProductInput, { CartItem } from '../input/buyProduct.input';
 import CreateProductInput from '../input/createProduct.input';
 import config from '@vendor-app/config/index';
+import { DepositsService } from '@vendor-app/deposits/services/deposits.service';
 
 type ProductModel<T extends Document> = PaginateModel<T>;
 @Injectable()
@@ -18,6 +19,7 @@ export class ProductsService {
     @InjectModel(SCHEMAS.PRODUCT)
     readonly PaginatedProduct: ProductModel<Product>,
     @InjectConnection() private readonly connection: Connection,
+    private readonly depositService: DepositsService,
   ) {}
 
   /**
@@ -113,6 +115,8 @@ export class ProductsService {
           'The total price of the selected products cannot be more than your deposit',
         );
       }
+
+      this.depositService.reset(user._id);
 
       await session.commitTransaction();
 

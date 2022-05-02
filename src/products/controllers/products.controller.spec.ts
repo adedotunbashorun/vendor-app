@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { MongooseModelModule } from '@vendor-app/core/mongooseModels.module';
 import { rootMongooseTestModule } from '../../../test/database';
+import { DepositsService } from '@vendor-app/deposits/services/deposits.service';
 
 describe('ProductsController', () => {
   let controller: ProductsController;
@@ -27,7 +28,7 @@ describe('ProductsController', () => {
         }),
       ],
       controllers: [ProductsController],
-      providers: [ProductsService],
+      providers: [ProductsService, DepositsService],
     }).compile();
 
     controller = module.get<ProductsController>(ProductsController);

@@ -7,5 +7,6 @@ import { DepositsService } from '@vendor-app/deposits/services/deposits.service'
   imports: [MongooseModelModule],
   controllers: [DepositsController],
   providers: [DepositsService],
+  exports: [DepositsService],
 })
 export class DepositsModule {}
