@@ -24,9 +24,7 @@ import { DepositsModule } from '@vendor-app/deposits/deposits.module';
         return connection;
       },
       useNewUrlParser: true,
-      useCreateIndex: true,
       useUnifiedTopology: true,
-      useFindAndModify: false,
     }),
     WinstonModule.forRoot(logOptions),
     UsersModule,

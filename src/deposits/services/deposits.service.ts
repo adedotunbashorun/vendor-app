@@ -11,7 +11,9 @@ export class DepositsService {
   constructor(@InjectModel(SCHEMAS.USER) private UserModel: Model<User>) {}
 
   async deposit(id: string, input: DepositInput): Promise<User> {
-    return this.UserModel.findByIdAndUpdate(id, input, { new: true }).exec();
+    const user = await this.UserModel.findById(id);
+    user.deposit += input.deposit;
+    return user.save();
   }
 
   async reset(id: string): Promise<User> {
