@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
   UsePipes,
@@ -21,6 +22,7 @@ import { CurrentUser, Roles } from '../users.decorators';
 import LoginInput from '../input/login.input';
 import UpdateUserInput from '../input/updateUser.input';
 import RolesGuard from '@vendor-app/core/guards/roles.guard';
+import PaginationQuery from '@vendor-app/core/input/pagination-query.input';
 
 @ApiTags('users')
 @Controller('api')
@@ -47,22 +49,6 @@ export class UsersController {
   @ApiResponse({ status: 401, description: 'unauthorized.' })
   async register(@Body() input: CreateUserInput): Promise<User> {
     return this.auth.registerUser(input);
-  }
-
-  /**
-   * update current user.
-   */
-  @UsePipes(new ValidationPipe({ whitelist: true }))
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles('seller')
-  @Patch('users')
-  @ApiResponse({ status: 201, description: 'user updated.' })
-  @ApiResponse({ status: 401, description: 'unauthorized.' })
-  async update(
-    @Param('id') id: string,
-    @Body() input: UpdateUserInput,
-  ): Promise<User> {
-    return this.auth.updateUser(id, input);
   }
 
   /**
@@ -94,10 +80,66 @@ export class UsersController {
     return this.auth.logoutAll(user.id);
   }
 
+  /**
+   *
+   * @param input
+   * @returns
+   */
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('seller', 'buyer')
+  @Get('users')
+  @ApiResponse({ status: 201, description: 'get all users paginated data' })
+  @ApiResponse({ status: 401, description: 'unauthorized.' })
+  async index(@Query() input: PaginationQuery): Promise<any> {
+    return this.auth.index(input);
+  }
+
+  /**
+   * create user.
+   */
   @UsePipes(new ValidationPipe({ whitelist: true }))
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('seller')
-  @Delete('users')
+  @Post('users')
+  @ApiResponse({ status: 201, description: 'user updated.' })
+  @ApiResponse({ status: 401, description: 'unauthorized.' })
+  async create(@Body() input: CreateUserInput): Promise<User> {
+    return this.auth.create(input);
+  }
+
+  /**
+   * update user.
+   */
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('seller')
+  @Patch('users/:id')
+  @ApiResponse({ status: 201, description: 'user updated.' })
+  @ApiResponse({ status: 401, description: 'unauthorized.' })
+  async update(
+    @Param('id') id: string,
+    @Body() input: UpdateUserInput,
+  ): Promise<User> {
+    return this.auth.updateUser(id, input);
+  }
+
+  /**
+   * view user.
+   */
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('seller')
+  @Get('users/:id')
+  @ApiResponse({ status: 201, description: 'view single user.' })
+  @ApiResponse({ status: 401, description: 'unauthorized.' })
+  async show(@Param('id') id: string): Promise<User> {
+    return this.auth.getUserByKey('_id', id);
+  }
+
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('seller')
+  @Delete('users/:id')
   @ApiResponse({ status: 201, description: 'user deleted' })
   @ApiResponse({ status: 401, description: 'unauthorized.' })
   async delete(@Param('id') id: string): Promise<User> {

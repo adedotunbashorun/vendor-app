@@ -1,20 +1,46 @@
 import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Document, Model, PaginateModel } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 
 import { SCHEMAS } from '@vendor-app/core/constants';
 import { User } from '../schema/users/user.schema';
 import CreateUserInput from '../input/createUser.input';
 import UpdateUserInput from '../input/updateUser.input';
+import PaginationQuery from '@vendor-app/core/input/pagination-query.input';
 
+type UserModel<T extends Document> = PaginateModel<T>;
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(SCHEMAS.USER) private UserModel: Model<User>,
+    @InjectModel(SCHEMAS.USER) private userModel: Model<User>,
+    @InjectModel(SCHEMAS.USER)
+    readonly paginatedUser: UserModel<User>,
     private jwtService: JwtService,
   ) {}
+
+  /**
+   * Get all users paginated data
+   * @param user
+   * @param data
+   */
+  async index(data: PaginationQuery): Promise<any> {
+    const customLabels = {
+      docs: 'nodes',
+      page: 'currentPage',
+      totalPages: 'pageCount',
+      limit: 'perPage',
+      totalDocs: 'itemCount',
+    };
+
+    const query = {};
+
+    return await this.paginatedUser.paginate(query, {
+      customLabels,
+      ...data,
+    });
+  }
 
   /**
    * Validate the users credentials.
@@ -28,7 +54,8 @@ export class UsersService {
    * @constructor
    */
   async validateUser(email: string, password: string): Promise<User> {
-    const user = await this.UserModel.findOne({ email })
+    const user = await this.userModel
+      .findOne({ email })
       .select('+password')
       .exec();
     // Check if password is correct
@@ -60,7 +87,7 @@ export class UsersService {
     try {
       payload.password = bcrypt.hashSync(payload.password, 10);
 
-      const user: User = new this.UserModel(payload);
+      const user: User = new this.userModel(payload);
       await user.save();
 
       return {
@@ -79,6 +106,13 @@ export class UsersService {
         ...error,
       };
     }
+  }
+
+  async create(input: CreateUserInput): Promise<User> {
+    input.password = bcrypt.hashSync(input.password, 10);
+    return this.userModel.create({
+      ...input,
+    });
   }
 
   /**
@@ -104,9 +138,7 @@ export class UsersService {
    * @todo Integrate with the roles guard.
    */
   async getUserByKey(key: string, value: string): Promise<any> {
-    const check = await this.UserModel.findOne({ [key]: value });
-
-    return check;
+    return this.userModel.findOne({ [key]: value });
   }
 
   /**
@@ -114,7 +146,7 @@ export class UsersService {
    * @param user
    */
   async getUser(user: User): Promise<User> {
-    return await this.UserModel.findById(user.id).select('+password');
+    return await this.userModel.findById(user.id).select('+password');
   }
 
   /**
@@ -122,20 +154,18 @@ export class UsersService {
    * @param user
    */
   async updateUser(id: string, data: UpdateUserInput): Promise<User> {
-    return this.UserModel.findByIdAndUpdate(id, data, { new: true }).exec();
+    return this.userModel.findByIdAndUpdate(id, data, { new: true }).exec();
   }
 
   async logoutAll(id: string): Promise<number> {
-    await this.UserModel.findByIdAndUpdate(
-      id,
-      { isActive: false },
-      { new: true },
-    ).exec();
+    await this.userModel
+      .findByIdAndUpdate(id, { isActive: false }, { new: true })
+      .exec();
 
     return HttpStatus.OK;
   }
 
   async delete(_id: string): Promise<any> {
-    return this.UserModel.deleteOne({ _id });
+    return this.userModel.deleteOne({ _id });
   }
 }
