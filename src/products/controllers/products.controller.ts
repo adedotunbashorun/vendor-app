@@ -18,6 +18,7 @@ import PaginationQuery from '@vendor-app/core/input/pagination-query.input';
 import { User } from '@vendor-app/users/schema/users/user.schema';
 import { CurrentUser, Roles } from '@vendor-app/users/users.decorators';
 import CreateProductInput from '../input/createProduct.input';
+import UpdateProductInput from '../input/updateProduct.input';
 import { Product } from '../schema/products/product.schema';
 import { ProductsService } from '../services/products.service';
 
@@ -33,9 +34,9 @@ export class ProductsController {
   @ApiResponse({ status: 401, description: 'unauthorized.' })
   async index(
     @CurrentUser() user: User,
-    @Query() data: PaginationQuery,
+    @Query() input: PaginationQuery,
   ): Promise<any> {
-    return this.product.index(user, data);
+    return this.product.index(user, input);
   }
 
   @UsePipes(new ValidationPipe({ whitelist: true }))
@@ -46,9 +47,9 @@ export class ProductsController {
   @ApiResponse({ status: 401, description: 'unauthorized.' })
   async create(
     @CurrentUser() user: User,
-    @Body() data: CreateProductInput,
+    @Body() input: CreateProductInput,
   ): Promise<Product> {
-    return this.product.create(user, data);
+    return this.product.create(user, input);
   }
 
   @UsePipes(new ValidationPipe({ whitelist: true }))
@@ -58,10 +59,10 @@ export class ProductsController {
   @ApiResponse({ status: 201, description: 'product updated' })
   @ApiResponse({ status: 401, description: 'unauthorized.' })
   async update(
-    @Param() id: string,
-    @Body() data: CreateProductInput,
+    @Param('id') id: string,
+    @Body() input: UpdateProductInput,
   ): Promise<Product> {
-    return this.product.update(id, data);
+    return this.product.update(id, input);
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -69,7 +70,7 @@ export class ProductsController {
   @Get('/:id')
   @ApiResponse({ status: 201, description: 'view single product data' })
   @ApiResponse({ status: 401, description: 'unauthorized.' })
-  async show(@Param() id: string): Promise<any> {
+  async show(@Param('id') id: string): Promise<Product> {
     return this.product.view(id);
   }
 
@@ -79,7 +80,7 @@ export class ProductsController {
   @Delete('/:id')
   @ApiResponse({ status: 201, description: 'product deleted' })
   @ApiResponse({ status: 401, description: 'unauthorized.' })
-  async delete(@Param() id: string): Promise<Product> {
+  async delete(@Param('id') id: string): Promise<Product> {
     return this.product.delete(id);
   }
 }

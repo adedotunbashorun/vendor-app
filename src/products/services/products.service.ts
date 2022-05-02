@@ -10,12 +10,14 @@ import BuyProductInput, { CartItem } from '../input/buyProduct.input';
 import CreateProductInput from '../input/createProduct.input';
 import config from '@vendor-app/config/index';
 import { DepositsService } from '@vendor-app/deposits/services/deposits.service';
+import UpdateProductInput from '../input/updateProduct.input';
 
 type ProductModel<T extends Document> = PaginateModel<T>;
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel(SCHEMAS.PRODUCT) private productModel: Model<Product>,
+    @InjectModel(SCHEMAS.USER) private userModel: Model<User>,
     @InjectModel(SCHEMAS.PRODUCT)
     readonly PaginatedProduct: ProductModel<Product>,
     @InjectConnection() private readonly connection: Connection,
@@ -56,15 +58,16 @@ export class ProductsService {
     return this.productModel.findById(id);
   }
 
-  async update(id: string, input: CreateProductInput): Promise<Product> {
+  async update(id: string, input: UpdateProductInput): Promise<Product> {
     return this.productModel.findByIdAndUpdate(id, input, { new: true }).exec();
   }
 
-  async delete(id: string): Promise<any> {
-    return this.productModel.findOneAndRemove({ id });
+  async delete(_id: string): Promise<any> {
+    return this.productModel.deleteOne({ _id });
   }
 
-  async buy(user: User, input: BuyProductInput): Promise<any> {
+  async buy(currentUser: User, input: BuyProductInput): Promise<any> {
+    const user = await this.userModel.findById(currentUser.id);
     const items = input.products;
     let totalAmount = 0;
     const productsArray = [];
