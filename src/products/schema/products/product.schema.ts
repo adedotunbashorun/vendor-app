@@ -10,10 +10,16 @@ import { User } from '@vendor-app/users/schema/users/user.schema';
 })
 export class Product extends Document {
   @Prop()
-  name: string;
+  id: string;
 
   @Prop()
-  cost: string;
+  name: string;
+
+  @Prop({
+    type: Number,
+    default: 0,
+  })
+  cost: number;
 
   @Prop({
     type: MongooseSchema.Types.ObjectId,

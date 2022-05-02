@@ -64,6 +64,15 @@ export class ProductsController {
     return this.product.update(id, data);
   }
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('seller', 'buyer')
+  @Get('/:id')
+  @ApiResponse({ status: 201, description: 'view single product data' })
+  @ApiResponse({ status: 401, description: 'unauthorized.' })
+  async show(@Param() id: string): Promise<any> {
+    return this.product.view(id);
+  }
+
   @UsePipes(new ValidationPipe({ whitelist: true }))
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('seller')
@@ -72,14 +81,5 @@ export class ProductsController {
   @ApiResponse({ status: 401, description: 'unauthorized.' })
   async delete(@Param() id: string): Promise<Product> {
     return this.product.delete(id);
-  }
-
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles('seller', 'buyer')
-  @Get('/:id')
-  @ApiResponse({ status: 201, description: 'view single product data' })
-  @ApiResponse({ status: 401, description: 'unauthorized.' })
-  async show(@Param() id: string): Promise<any> {
-    return this.product.view(id);
   }
 }

@@ -28,6 +28,7 @@ export interface Configuration {
     secret: string;
     duration: string;
   };
+  depositRange: number[];
 }
 
 const { NODE_ENV, SERVER_MODE } = process.env;
@@ -60,4 +61,5 @@ export default (): Configuration => ({
     secret: process.env.JWT_SECRET,
     duration: process.env.TOKEN_LIFETIME as string,
   },
+  depositRange: [5, 10, 20, 50, 100],
 });

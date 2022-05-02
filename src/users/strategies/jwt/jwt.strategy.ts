@@ -1,6 +1,8 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import configuration from '@vendor-app/config';
+import { User } from '@vendor-app/users/schema/users/user.schema';
+import { UsersService } from '@vendor-app/users/services/users.service';
 
 /**
  * JWT auth strategy.
@@ -9,7 +11,7 @@ import configuration from '@vendor-app/config';
  * @todo use injected config
  */
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private userService: UsersService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: configuration().jwt.secret,
@@ -20,7 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   /**
    * Check if JWT Token is valid
    */
-  async validate(payload: any) {
-    return payload;
+  async validate(payload: User) {
+    return this.userService.getUser(payload);
   }
 }
