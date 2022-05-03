@@ -1,4 +1,4 @@
-import { Body, Controller, Get, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiResponse } from '@nestjs/swagger';
 import RolesGuard from '@vendor-app/core/guards/roles.guard';
@@ -7,13 +7,13 @@ import { Roles, CurrentUser } from '@vendor-app/users/users.decorators';
 import BuyProductInput from '../input/buyProduct.input';
 import { ProductsService } from '../services/products.service';
 
-@Controller('buyproducts')
+@Controller('api/buyproducts')
 export class BuyproductsController {
   constructor(private readonly product: ProductsService) {}
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('buyer')
-  @Get('')
+  @Post('')
   @ApiResponse({ status: 201, description: 'buy product' })
   @ApiResponse({ status: 401, description: 'unauthorized.' })
   async buy(
