@@ -10,17 +10,11 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import * as _ from 'lodash';
-
-import { InjectConnection } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
 import { User } from '@vendor-app/users/schema/users/user.schema';
 
 @Injectable()
 export default class RolesGuard implements CanActivate {
-  constructor(
-    private readonly reflector: Reflector,
-    @InjectConnection() private connection: Connection,
-  ) {}
+  constructor(private readonly reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const roles = this.reflector.get<string[]>('roles', context.getHandler());
