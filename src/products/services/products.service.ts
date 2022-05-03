@@ -48,6 +48,11 @@ export class ProductsService {
   }
 
   async create(user: User, input: CreateProductInput): Promise<Product> {
+    if (user.role !== 'seller') {
+      throw new BadRequestException(
+        'Whoops! You dont access to create product.',
+      );
+    }
     return this.productModel.create({
       ...input,
       sellerId: user.id,
@@ -58,11 +63,27 @@ export class ProductsService {
     return this.productModel.findById(id);
   }
 
-  async update(id: string, input: UpdateProductInput): Promise<Product> {
+  async update(
+    user: User,
+    id: string,
+    input: UpdateProductInput,
+  ): Promise<Product> {
+    const product = await this.productModel.findById(id);
+    if (product.sellerId.toString() !== user.id.toString()) {
+      throw new BadRequestException(
+        'Whoops! You dont access to update this product.',
+      );
+    }
     return this.productModel.findByIdAndUpdate(id, input, { new: true }).exec();
   }
 
-  async delete(_id: string): Promise<any> {
+  async delete(user: User, _id: string): Promise<any> {
+    const product = await this.productModel.findById(_id);
+    if (product.sellerId.toString() !== user.id.toString()) {
+      throw new BadRequestException(
+        'Whoops! You dont access to delete this product.',
+      );
+    }
     return this.productModel.deleteOne({ _id });
   }
 
@@ -118,7 +139,7 @@ export class ProductsService {
           'The total price of the selected products cannot be more than your deposit',
         );
       }
-
+      // reset user deposit
       this.depositService.reset(user._id);
 
       await session.commitTransaction();

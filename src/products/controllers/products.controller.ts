@@ -59,10 +59,11 @@ export class ProductsController {
   @ApiResponse({ status: 201, description: 'product updated' })
   @ApiResponse({ status: 401, description: 'unauthorized.' })
   async update(
+    @CurrentUser() user: User,
     @Param('id') id: string,
     @Body() input: UpdateProductInput,
   ): Promise<Product> {
-    return this.product.update(id, input);
+    return this.product.update(user, id, input);
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -80,7 +81,10 @@ export class ProductsController {
   @Delete('/:id')
   @ApiResponse({ status: 201, description: 'product deleted' })
   @ApiResponse({ status: 401, description: 'unauthorized.' })
-  async delete(@Param('id') id: string): Promise<Product> {
-    return this.product.delete(id);
+  async delete(
+    @CurrentUser() user: User,
+    @Param('id') id: string,
+  ): Promise<Product> {
+    return this.product.delete(user, id);
   }
 }

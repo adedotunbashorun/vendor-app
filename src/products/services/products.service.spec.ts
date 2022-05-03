@@ -41,7 +41,7 @@ describe.only('ProductsService', () => {
   describe('createProduct', () => {
     it('should create products', async () => {
       const user = await testDataSeeder.seedUserByRole('seller');
-      await testDataSeeder.seedProduct(user.id);
+      await testDataSeeder.seedProduct(user._id);
 
       const result = await service.create(user, {
         name: 'Water Mellon',
@@ -57,7 +57,7 @@ describe.only('ProductsService', () => {
   describe('List Product', () => {
     it('should list paginated products', async () => {
       const user = await testDataSeeder.seedUserByRole('seller');
-      await testDataSeeder.seedProduct(user.id);
+      await testDataSeeder.seedProduct(user._id);
 
       const result = await service.index(user, {
         page: 1,
@@ -73,9 +73,23 @@ describe.only('ProductsService', () => {
   describe('View Product', () => {
     it('should view single product', async () => {
       const user = await testDataSeeder.seedUserByRole('seller');
-      const products = await testDataSeeder.seedProduct(user.id);
+      const products = await testDataSeeder.seedProduct(user._id);
 
-      const result = await service.view(products[0].id);
+      const result = await service.view(products[0]._id);
+
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('Update Product', () => {
+    it('should update single product', async () => {
+      const user = await testDataSeeder.seedUserByRole('seller');
+      const products = await testDataSeeder.seedProduct(user._id);
+
+      const result = await service.update(user, products[0]._id, {
+        amountAvailable: 60,
+        cost: 10,
+      });
 
       expect(result).toBeDefined();
     });
@@ -84,9 +98,9 @@ describe.only('ProductsService', () => {
   describe('Delete Product', () => {
     it('should delete single product', async () => {
       const user = await testDataSeeder.seedUserByRole('seller');
-      const products = await testDataSeeder.seedProduct(user.id);
+      const products = await testDataSeeder.seedProduct(user._id);
 
-      const result = await service.delete(products[0].id);
+      const result = await service.delete(user, products[0]._id);
 
       expect(result).toBeDefined();
     });
@@ -101,11 +115,11 @@ describe.only('ProductsService', () => {
         service.buy(buyer, {
           products: [
             {
-              id: products[0].id,
+              id: products[0]._id,
               quantity: 5,
             },
             {
-              id: products[1].id,
+              id: products[1]._id,
               quantity: 10,
             },
           ],
